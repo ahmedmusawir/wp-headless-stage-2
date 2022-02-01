@@ -20,8 +20,6 @@ function BlogIndex() {
     isPending,
   } = useContext(BlogContext);
 
-  console.log(isPending);
-
   // MASONRY BREAKING POINT
   const breakpointColumnsObj = {
     default: 4,
@@ -54,6 +52,7 @@ function BlogIndex() {
           </Content>
         </Col>
       </Row>
+
       <Row>
         <Content width="w-100" cssClassNames="mt-2">
           <Masonry
@@ -93,6 +92,7 @@ function BlogIndex() {
           </Masonry>
         </Content>
       </Row>
+
       {isPending && (
         <div className="text-center">
           <Loader type="ThreeDots" color="red" height={100} width={100} />

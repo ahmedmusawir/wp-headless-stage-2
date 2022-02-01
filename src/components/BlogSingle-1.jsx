@@ -19,16 +19,15 @@ function BlogSingle({ postId }) {
       const gotSinglePost = await fetchSinglePost(postId);
       // Setting Single Post State
       setPost(gotSinglePost);
-
-      // Loading Spinner Ends
-      setIsPending(false);
     };
 
     getSinglePost();
+    // Loading Spinner Ends
+    setIsPending(false);
   }, []);
 
   return (
-    <>
+    <div>
       {isPending && (
         <div className="text-center">
           <Loader type="ThreeDots" color="red" height={100} width={100} />
@@ -91,7 +90,7 @@ function BlogSingle({ postId }) {
           </>
         )}
       </section>
-    </>
+    </div>
   );
 }
 

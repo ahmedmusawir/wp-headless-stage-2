@@ -11,6 +11,7 @@ import './App.scss';
 import FormikPage from './pages/FormikPage';
 import FormJoiPage from './pages/FormJoiPage';
 import MooseFormPage from './pages/MooseFormPage';
+import BlogContextProvider from './context/BlogContext';
 // import PostCreatePage from './pages/_old/PostCreatePage';
 // import NextPrevPage from './pages/NextPrevPage';
 // import NumericPage from './pages/NumericPage';
@@ -20,55 +21,57 @@ import MooseFormPage from './pages/MooseFormPage';
 
 function App(props) {
   return (
-    <BrowserRouter>
-      <MainNavbar />
-      <main>
-        <Switch>
-          <Route exact path="/">
-            <HomePage />
-          </Route>
-          <Route exact path="/nextprev">
-            {/* <NextPrevPage /> */}
-          </Route>
-          <Route exact path="/numeric">
-            {/* <NumericPage /> */}
-          </Route>
-          <Route exact path="/loadmore">
-            {/* <LoadMorePage /> */}
-          </Route>
-          <Route exact path="/masonry-layout">
-            {/* <MasonryLayoutPage /> */}
-          </Route>
-          <Route exact path="/masonry-layout">
-            {/* <CardLayoutPage /> */}
-          </Route>
-          <Route exact path="/create-post-page">
-            <CreatePostPage />
-          </Route>
-          <Route exact path="/single-post/:id">
-            <SinglePostPage />
-          </Route>
-          <Route exact path="/update-post-page/:id">
-            <UpdatePostPage />
-          </Route>
-          <Route exact path="/sample-page">
-            <SamplePage />
-          </Route>
-          <Route exact path="/formik-page">
-            <FormikPage />
-          </Route>
-          <Route exact path="/form-joi-page">
-            <FormJoiPage />
-          </Route>
-          <Route exact path="/form-moose-page">
-            <MooseFormPage />
-          </Route>
-          <Route path="/*">
-            <NotFound />
-          </Route>
-        </Switch>
-      </main>
-    </BrowserRouter>
+    <BlogContextProvider>
+      <BrowserRouter>
+        <MainNavbar />
+        <main>
+          <Switch>
+            <Route exact path="/">
+              <HomePage />
+            </Route>
+            <Route exact path="/nextprev">
+              {/* <NextPrevPage /> */}
+            </Route>
+            <Route exact path="/numeric">
+              {/* <NumericPage /> */}
+            </Route>
+            <Route exact path="/loadmore">
+              {/* <LoadMorePage /> */}
+            </Route>
+            <Route exact path="/masonry-layout">
+              {/* <MasonryLayoutPage /> */}
+            </Route>
+            <Route exact path="/masonry-layout">
+              {/* <CardLayoutPage /> */}
+            </Route>
+            <Route exact path="/create-post-page">
+              <CreatePostPage />
+            </Route>
+            <Route exact path="/single-post/:id">
+              <SinglePostPage />
+            </Route>
+            <Route exact path="/update-post-page/:id">
+              <UpdatePostPage />
+            </Route>
+            <Route exact path="/sample-page">
+              <SamplePage />
+            </Route>
+            <Route exact path="/formik-page">
+              <FormikPage />
+            </Route>
+            <Route exact path="/form-joi-page">
+              <FormJoiPage />
+            </Route>
+            <Route exact path="/form-moose-page">
+              <MooseFormPage />
+            </Route>
+            <Route path="/*">
+              <NotFound />
+            </Route>
+          </Switch>
+        </main>
+      </BrowserRouter>
+    </BlogContextProvider>
   );
 }
 

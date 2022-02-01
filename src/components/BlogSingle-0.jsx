@@ -1,34 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import Loader from 'react-loader-spinner';
 import { Link } from 'react-router-dom';
+import WPAPI from 'wpapi';
 import parse from 'html-react-parser';
 import { Row, Col } from 'react-bootstrap';
-import Content from '../components/layouts/Content';
-import { fetchSinglePost } from '../services/HttpService';
+import Content from './layouts/Content';
 
 function BlogSingle({ postId }) {
+  // Create WPAPI instance and add endpoint to /wp-json
+  const wp = new WPAPI({
+    endpoint: 'http://localhost:10004/wp-json',
+    username: 'cgteam',
+    password: '8gLw rmzE hQhZ av4L 1ljg x119',
+  });
+
   const [post, setPost] = useState('');
   const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
-    // Loading Spinner Starts
-    setIsPending(true);
+    const fetchSinglePost = async () => {
+      try {
+        // Loading Spinner Starts
+        setIsPending(true);
+        // Fetch Single Post
+        const singlePost = await wp.posts().id(postId).get();
+        console.log('Single Post: ', singlePost);
+        setPost(singlePost);
 
-    // Collecting Data from Http Service
-    const getSinglePost = async () => {
-      const gotSinglePost = await fetchSinglePost(postId);
-      // Setting Single Post State
-      setPost(gotSinglePost);
-
-      // Loading Spinner Ends
-      setIsPending(false);
+        // Loading Spinner Ends
+        setIsPending(false);
+      } catch (e) {
+        // print error
+        console.log(e);
+        return [];
+      }
     };
-
-    getSinglePost();
+    fetchSinglePost();
   }, []);
 
   return (
-    <>
+    <div>
       {isPending && (
         <div className="text-center">
           <Loader type="ThreeDots" color="red" height={100} width={100} />
@@ -91,7 +102,7 @@ function BlogSingle({ postId }) {
           </>
         )}
       </section>
-    </>
+    </div>
   );
 }
 

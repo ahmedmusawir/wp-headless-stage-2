@@ -1,0 +1,29 @@
+[
+  {
+    "env": "DEV",
+    "info": {
+      "apiUrl": "http://localhost:10004/wp-json",
+      "userName": "cgteam",
+      "passWord": "8gLw rmzE hQhZ av4L 1ljg x119",
+      "perPage": 5
+    }
+  },
+  {
+    "env": "STG",
+    "info": {
+      "apiUrl": "http://localhost:10028/wp-json",
+      "userName": "cgteam",
+      "passWord": "NUfj f21D Qjue MkLs DYIn qdq2",
+      "perPage": 5
+    }
+  },
+  {
+    "env": "PROD",
+    "info": {
+      "apiUrl": "https://digitalsupportstaff.com/wp-json",
+      "userName": "cgteam",
+      "passWord": "fUyc qtVJ GimL nVdp iDXT Ftqu",
+      "perPage": 5
+    }
+  }
+]

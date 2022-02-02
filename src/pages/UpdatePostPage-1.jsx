@@ -9,8 +9,7 @@ import _ from 'lodash';
 
 function UpdatePostPage() {
   const { id } = useParams();
-  const { posts, setPosts, isPending, setIsPending, oldImage, setOldImage } =
-    useContext(BlogContext);
+  const { posts, isPending } = useContext(BlogContext);
   const postId = Number(id);
 
   const singlePost = _.find(posts, (post) => post.id === Number(id));
@@ -20,16 +19,7 @@ function UpdatePostPage() {
       <Row className="justify-content-center">
         <Col sm={12}>
           <Content width="w-100" cssClassNames="bg-light mt-2 clearfix">
-            <UpdatePost
-              postId={postId}
-              singlePost={singlePost}
-              posts={posts}
-              setPosts={setPosts}
-              isPending={isPending}
-              setIsPending={setIsPending}
-              oldImage={oldImage}
-              setOldImage={setOldImage}
-            />
+            <UpdatePost postId={postId} singlePost={singlePost} />
           </Content>
         </Col>
       </Row>

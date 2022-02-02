@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import Page from './layouts/Page';
 import { Row, Col } from 'react-bootstrap';
@@ -11,29 +11,39 @@ import TextAreaJoi from './form-joi/TextAreaJoi';
 import InputImageJoi from './form-joi/InputImageJoi';
 import FormJoi from './form-joi/FormJoi';
 import { fetchSinglePost, updatePost } from '../services/HttpService';
+import { BlogContext } from '../context/BlogContext';
+import _ from 'lodash';
 
 import 'animate.css';
 
-function UpdatePost({
-  postId,
-  singlePost,
-  posts,
-  setPosts,
-  isPending,
-  setIsPending,
-}) {
+function UpdatePost({ postId }) {
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [content, setContent] = useState('');
-  const [fileSize, setFileSize] = useState('');
   const [oldImage, setOldImage] = useState('');
+  const [fileSize, setFileSize] = useState('');
+  const [isPending, setIsPending] = useState(false);
   const [errors, setErrors] = useState({});
   const history = useHistory();
+  const { posts, setPosts } = useContext(BlogContext);
 
-  // console.log('SINGLE POST IN UPDATE POST', singlePost);
+  console.log('CONTEXT POSTS IN UPDATE POST', posts);
 
   useEffect(() => {
-    // Collecting Data from Http Service (in case the page refreshed)
+    if (posts) {
+      const singlePost = _.find(posts, (post) => post.id === Number(postId));
+      setTitle(singlePost.title.rendered);
+      setContent(singlePost.content.rendered);
+      setOldImage(singlePost.featured_thumb);
+    }
+    // SETTING FILE SIZE MANUALLY
+    // So that Joi validates in case user don't upload new image
+    // If no new image is uploaded the file size won't validate by
+    // Joi, cuz it's empty. It only gets file size when a file is
+    // uploaded by the form. On the edit screen, the previous image
+    // is loaded from the REST api
+    setFileSize(500);
+    // Collecting Data from Http Service
     const getSinglePost = async () => {
       const gotSinglePost = await fetchSinglePost(postId);
       console.log('Single Post', gotSinglePost);
@@ -43,26 +53,46 @@ function UpdatePost({
       setOldImage(gotSinglePost.featured_thumb);
     };
 
-    if (singlePost) {
-      setTitle(singlePost.title.rendered);
-      setContent(singlePost.content.rendered);
-      setOldImage(singlePost.featured_thumb);
-    } else {
+    if (posts === []) {
       getSinglePost();
     }
+  }, [posts]);
 
+  // console.log('UPDATE POST', post);
+
+  useEffect(() => {
+    // Loading Spinner Starts
+    // setIsPending(true);
+    //   // Updating Post Data
+    // const quickSingle = async () => {
+    //   await setTitle(post.title.rendered);
+    //   await setContent(post.content.rendered);
+    //   await setOldImage(post.featured_thumb);
+    // };
+    // quickSingle();
+    // Collecting Data from Http Service
+    // const getSinglePost = async () => {
+    //   const gotSinglePost = await fetchSinglePost(postId);
+    //   console.log('Single Post', gotSinglePost);
+    //   // Updating Post Data
+    //   setTitle(gotSinglePost.title.rendered);
+    //   setContent(gotSinglePost.content.rendered);
+    //   setOldImage(gotSinglePost.featured_thumb);
     // SETTING FILE SIZE MANUALLY
     // So that Joi validates in case user don't upload new image
     // If no new image is uploaded the file size won't validate by
     // Joi, cuz it's empty. It only gets file size when a file is
     // uploaded by the form. On the edit screen, the previous image
     // is loaded from the REST api
-    setFileSize(500);
-  }, [posts]);
-
-  // console.log('SINGLE ON UPDATE POST', singlePost);
+    // setFileSize(500);
+    // };
+    // getSinglePost();
+    // Loading Spinner Ends
+    // setIsPending(false);
+  }, []);
 
   // FORM VALUE OBJECT
+
   const formValues = {
     title: title,
     content: content,
@@ -70,13 +100,15 @@ function UpdatePost({
     fileSize: fileSize,
   };
 
+  console.log('UPDATE POST - FORM VALUE', formValues);
+
   // JOI SCHEMA
   const schema = {
     title: Joi.string().trim().required().label('Title'),
     content: Joi.string().trim().required().label('Content'),
     // This the update page so no need for empty img validation
     imageUrl: Joi.empty(),
-    fileSize: Joi.number().max(100000),
+    fileSize: Joi.number().max(300000),
   };
 
   const doSubmit = async () => {
@@ -91,34 +123,28 @@ function UpdatePost({
       title,
       content
     );
-
-    console.log('UPDATED HTTPS POST IN UPDATE POST', updatedPost);
-
-    // UPDATING POSTS STATE
+    // setPosts({ ...posts, updatedPost });
     setPosts(
       posts.map((post) => {
-        return post.id === singlePost.id
+        return post.id === updatedPost.id
           ? {
               ...post,
               title: {
-                rendered: title,
+                rendered: updatedPost.title,
               },
               content: {
-                rendered: content,
+                rendered: updatedPost.content,
               },
-              excerpt: {
-                rendered: updatedPost.excerpt.rendered,
-              },
-              featured_full: updatedPost.featured_full,
-              featured_thumb: updatedPost.featured_thumb,
             }
           : post;
       })
     );
 
-    // POST CREATION SUCCESS
-    setIsPending(false);
+    console.log('UPDATED POST IN UPDATE POST', updatedPost);
+    console.log('POSTS IN UPDATE POST', posts);
 
+    // END LOADING SPINNER
+    setIsPending(false);
     // SENDING USER TO BLOGINDEX PAGE
     history.push('/');
   };
@@ -134,11 +160,6 @@ function UpdatePost({
           </Content>
         </Col>
       </Row>
-      {isPending && (
-        <div className="text-center">
-          <Loader type="ThreeDots" color="red" height={100} width={100} />
-        </div>
-      )}
       <Row className="justify-content-center">
         <Col sm={12}>
           <Content
@@ -157,7 +178,7 @@ function UpdatePost({
                 label="Title"
                 type="text"
                 name="title"
-                value={parse(title)}
+                value={title}
                 placeholder="Post Title"
                 className="form-control"
                 onChangeState={setTitle}
@@ -190,7 +211,7 @@ function UpdatePost({
               <hr className="bg-primary" />
 
               <button className="btn btn-primary mt-2" type="submit">
-                UPDATE NOW
+                Create Now
               </button>
               {isPending && (
                 <div className="text-center">
@@ -205,6 +226,11 @@ function UpdatePost({
             </FormJoi>
           </Content>
         </Col>
+        {isPending && (
+          <div className="text-center">
+            <Loader type="ThreeDots" color="red" height={100} width={100} />
+          </div>
+        )}
       </Row>
     </Page>
   );

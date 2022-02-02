@@ -13,7 +13,6 @@ export const BlogContext = createContext();
 function BlogContextProvider(props) {
   const [posts, setPosts] = useState([]);
   const [isPending, setIsPending] = useState(false);
-  const [oldImage, setOldImage] = useState('');
   const [pageNumber, setPageNumber] = useState(2);
   const [totalPages, setTotalPages] = useState(0);
   const [perPage] = useState(conf.perPage);
@@ -84,8 +83,6 @@ function BlogContextProvider(props) {
         pageNumber,
         isPending,
         setIsPending,
-        oldImage,
-        setOldImage,
       }}
     >
       {props.children}

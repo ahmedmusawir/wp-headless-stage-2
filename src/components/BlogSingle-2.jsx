@@ -1,29 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import Loader from 'react-loader-spinner';
+import { Link } from 'react-router-dom';
 import parse from 'html-react-parser';
 import { Row, Col } from 'react-bootstrap';
 import Content from '../components/layouts/Content';
-import { useParams } from 'react-router-dom';
 import { fetchSinglePost } from '../services/HttpService';
 
-function BlogSingle({ postId, post, setPost, isPending }) {
-  const { id } = useParams();
-
-  // console.log('BLOG SINGLE POST', post);
+function BlogSingle({ postId }) {
+  const [post, setPost] = useState('');
+  const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
-    // Collecting Data from Http Service when the single post page
-    // is refreshed. Otherwize the page crashes since post or
-    // singlePost becomes empty
-    if (post === undefined) {
-      const getSinglePost = async () => {
-        const gotSinglePost = await fetchSinglePost(id);
-        setPost(gotSinglePost);
-        // console.log('SINGLE POST (useEffect)', post);
-      };
-      getSinglePost();
-    }
-  }, [post]);
+    // Loading Spinner Starts
+    setIsPending(true);
+
+    // Collecting Data from Http Service
+    const getSinglePost = async () => {
+      const gotSinglePost = await fetchSinglePost(postId);
+      // Setting Single Post State
+      setPost(gotSinglePost);
+
+      // Loading Spinner Ends
+      setIsPending(false);
+    };
+
+    getSinglePost();
+  }, []);
 
   return (
     <>
@@ -35,6 +37,28 @@ function BlogSingle({ postId, post, setPost, isPending }) {
       <section className="list-group">
         {post && (
           <>
+            <Row className="justify-content-center">
+              <Col sm={12}>
+                <Content
+                  width="w-100"
+                  cssClassNames="bg-light mt-2 d-flex justify-content-between"
+                >
+                  {/* THE FOLLOWING DIVS ARE FOR FLEX LAYOUT */}
+                  <div className="text-block">
+                    <h3>Single Post Page</h3>
+                    <h5>And Cards from React Bootstrap 5 ...</h5>
+                  </div>
+                  <div className="button-block">
+                    <Link
+                      to={'/update-post-page/' + postId}
+                      className="btn btn-info btn-lg px-5 py-4"
+                    >
+                      Edit Post
+                    </Link>
+                  </div>
+                </Content>
+              </Col>
+            </Row>
             <Row>
               <Col sm={12} md={12} lg={6}>
                 {post.featured_full ? (

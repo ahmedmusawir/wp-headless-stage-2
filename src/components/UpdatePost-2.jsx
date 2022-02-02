@@ -21,12 +21,13 @@ function UpdatePost({
   setPosts,
   isPending,
   setIsPending,
+  oldImage,
+  setOldImage,
 }) {
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [content, setContent] = useState('');
   const [fileSize, setFileSize] = useState('');
-  const [oldImage, setOldImage] = useState('');
   const [errors, setErrors] = useState({});
   const history = useHistory();
 
@@ -93,6 +94,9 @@ function UpdatePost({
     );
 
     console.log('UPDATED HTTPS POST IN UPDATE POST', updatedPost);
+    // UPDATING OLD IMAGE
+    setOldImage(updatedPost.featured_thumb);
+    console.log('OLD IMG URL', updatedPost.featured_thumb);
 
     // UPDATING POSTS STATE
     setPosts(
@@ -110,7 +114,6 @@ function UpdatePost({
                 rendered: updatedPost.excerpt.rendered,
               },
               featured_full: updatedPost.featured_full,
-              featured_thumb: updatedPost.featured_thumb,
             }
           : post;
       })
@@ -131,6 +134,7 @@ function UpdatePost({
             <h3>
               Post Update Page <small>with Image</small>
             </h3>
+            <img src={oldImage} alt="" />
           </Content>
         </Col>
       </Row>
@@ -150,6 +154,7 @@ function UpdatePost({
               schema={schema}
               setErrors={setErrors}
               doSubmit={doSubmit}
+              oldImage={oldImage}
             >
               {/* INPUT JOI */}
               <InputJoi

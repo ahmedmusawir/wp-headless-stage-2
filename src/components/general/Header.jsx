@@ -7,7 +7,7 @@ function Header() {
     <Row className="justify-content-center">
       <Col sm={12}>
         <Content width="w-100" cssClassNames="bg-light mt-2">
-          <h1>React CRUD w/ HeadLess WP </h1>
+          <h1>React CRUD w/ HeadLess WP - STAGE 2</h1>
         </Content>
       </Col>
     </Row>

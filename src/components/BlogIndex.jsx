@@ -20,7 +20,7 @@ function BlogIndex() {
     isPending,
   } = useContext(BlogContext);
 
-  console.log(isPending);
+  // console.log('CONTEXT POST IN BLOG INDEX: ', posts);
 
   // MASONRY BREAKING POINT
   const breakpointColumnsObj = {

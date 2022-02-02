@@ -21,7 +21,7 @@ function SinglePostPage() {
     setPost(singlePost);
   }, []);
 
-  // console.log('SINGLE POST PAGE:', post);
+  console.log('SINGLE POST PAGE:', post);
   return (
     <Page wide={true} pageTitle="Single Post">
       <Row className="justify-content-center">

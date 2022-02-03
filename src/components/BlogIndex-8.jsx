@@ -1,99 +1,41 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import Loader from 'react-loader-spinner';
 import { Row, Col, Card, Button } from 'react-bootstrap';
 import Content from '../components/layouts/Content';
 import parse from 'html-react-parser';
 import { Link } from 'react-router-dom';
-import LoadMorePagination, {
-  loadMorePosts,
-} from '../components/general/LoadMorePagination';
-import { fetchPosts, conf, deletePost } from '../services/HttpService';
-import { confirmAlert } from 'react-confirm-alert'; // Import
+import LoadMorePagination from '../components/general/LoadMorePagination';
+import { BlogContext } from '../context/BlogContext';
+import { ToastContainer, toast } from 'react-toastify';
+
 import Masonry from 'react-masonry-css';
 import './BlogIndex.scss';
 import 'animate.css';
+import 'react-toastify/dist/ReactToastify.css';
 
 function BlogIndex() {
-  const [posts, setPosts] = useState([]);
-  const [isPending, setIsPending] = useState(false);
-  const [pageNumber, setPageNumber] = useState(2);
-  const [totalPages, setTotalPages] = useState(0);
-  const [perPage] = useState(conf.perPage);
+  const {
+    posts,
+    handleDelete,
+    handleLoadMore,
+    totalPages,
+    pageNumber,
+    isPending,
+  } = useContext(BlogContext);
+
+  // console.log('CONTEXT POST IN BLOG INDEX: ', posts);
 
   // MASONRY BREAKING POINT
   const breakpointColumnsObj = {
     default: 4,
     1500: 3,
-    1100: 2,
+    1100: 4,
     700: 1,
-  };
-
-  useEffect(() => {
-    // Loading Spinner Starts
-    setIsPending(true);
-
-    // Collecting Data from Http Service
-    const getPosts = async () => {
-      const gotPosts = await fetchPosts();
-      // Updating Posts
-      setPosts(gotPosts);
-      // Updating Total Pages
-      setTotalPages(gotPosts._paging.totalPages);
-
-      // Loading Spinner Ends
-      setIsPending(false);
-    };
-
-    getPosts();
-  }, []);
-
-  const handleDelete = (postId) => {
-    confirmAlert({
-      title: 'Deleting the Post',
-      message: 'Are you sure to do this.',
-      buttons: [
-        {
-          label: 'Yes',
-          onClick: async () => {
-            // Loading Spinner Starts
-            setIsPending(true);
-            // Post being deleted
-            await deletePost(postId, posts, setPosts);
-            // Loading Spinner Ends
-            setIsPending(false);
-          },
-        },
-        {
-          label: 'No',
-          onClick: () => console.log('nothing'),
-        },
-      ],
-    });
-  };
-
-  // const handleDelete = async (postId) => {
-  //   // Loading Spinner Starts
-  //   setIsPending(true);
-  //   // Post being deleted
-  //   await deletePost(postId, posts, setPosts);
-  //   // Loading Spinner Ends
-  //   setIsPending(false);
-  // };
-
-  const handleLoadmore = async () => {
-    console.log('load more button clicked');
-    // Loading Spinner Starts
-    setIsPending(true);
-    console.log('Handling Load More');
-    const snapShot = await loadMorePosts(pageNumber, perPage, totalPages);
-    setPosts([...posts, ...snapShot.newPosts]);
-    setPageNumber(snapShot.newPageNumber);
-    // Loading Spinner Starts
-    setIsPending(false);
   };
 
   return (
     <>
+      <ToastContainer />
       <Row className="justify-content-center">
         <Col sm={12}>
           <Content
@@ -116,7 +58,6 @@ function BlogIndex() {
           </Content>
         </Col>
       </Row>
-
       <Row>
         <Content width="w-100" cssClassNames="mt-2">
           <Masonry
@@ -156,14 +97,13 @@ function BlogIndex() {
           </Masonry>
         </Content>
       </Row>
-
       {isPending && (
         <div className="text-center">
           <Loader type="ThreeDots" color="red" height={100} width={100} />
         </div>
       )}
       {totalPages > 1 && pageNumber && (
-        <LoadMorePagination onLoadMore={handleLoadmore} />
+        <LoadMorePagination onLoadMore={handleLoadMore} />
       )}
     </>
   );

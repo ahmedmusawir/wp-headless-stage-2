@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Loader from 'react-loader-spinner';
 import parse from 'html-react-parser';
 import { Row, Col } from 'react-bootstrap';
+import Content from '../components/layouts/Content';
 import { useParams } from 'react-router-dom';
 import { fetchSinglePost } from '../services/HttpService';
 
@@ -22,7 +23,7 @@ function BlogSingle({ postId, post, setPost, isPending }) {
       };
       getSinglePost();
     }
-  }, [post, id, setPost]);
+  }, [post]);
 
   return (
     <>

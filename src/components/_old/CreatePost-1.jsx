@@ -1,111 +1,154 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import Page from './layouts/Page';
 import { Row, Col } from 'react-bootstrap';
 import Content from './layouts/Content';
+import Joi from 'joi-browser';
 import Loader from 'react-loader-spinner';
-import wp from '../services/HttpService';
+import InputJoi from './form-joi/InputJoi';
+import TextAreaJoi from './form-joi/TextAreaJoi';
+import InputImageJoi from './form-joi/InputImageJoi';
+import FormJoi from './form-joi/FormJoi';
+import { insertPost } from '../services/HttpService';
+import 'animate.css';
 
-function CreatePost() {
+function CreatePost({ posts, setPosts, isPending, setIsPending }) {
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [content, setContent] = useState('');
-  const [isPending, setIsPending] = useState(false);
+  const [fileSize, setFileSize] = useState('');
+  const [errors, setErrors] = useState({});
   const history = useHistory();
 
-  const handleInsertPost = async () => {
-    let uploadedImage = '';
-    let newPost = '';
+  console.log('OLD POSTS IN CREATE POST', posts);
+  // FORM VALUE OBJECT
+  const formValues = {
+    title: title,
+    content: content,
+    imageUrl: imageUrl,
+    fileSize: fileSize,
+  };
+
+  // JOI SCHEMA
+  const schema = {
+    title: Joi.string().trim().required().label('Title'),
+    content: Joi.string().required().label('Content'),
+    imageUrl: Joi.object().required().label('Featured Image'),
+    fileSize: Joi.number().max(100000),
+  };
+
+  const doSubmit = async () => {
+    // DISPLAY SUBMIT VALUE
+    console.log('FORM VALUES SUBMITTED: ', formValues);
     // STARTING LOADING SPINNER
     setIsPending(true);
+    // INSERT POST TO WP DB
+    const insertedPost = await insertPost(formValues);
+    console.log('INSERTED POST IN CREATE POST', insertedPost);
 
-    console.log('Image URL:', imageUrl);
+    // DATA ALTERED FOR LOCAL INSTANT FEEDBACK
+    const createdSinglePost = {
+      id: insertedPost.id,
+      title: {
+        rendered: insertedPost.title.rendered,
+      },
+      content: {
+        rendered: insertedPost.content.rendered,
+      },
+      excerpt: {
+        rendered: insertedPost.excerpt.rendered,
+      },
+      featured_full: insertedPost.featured_full,
+      featured_thumb: insertedPost.featured_thumb,
+    };
 
-    try {
-      // UPLOADING IMAGE
-      uploadedImage = await wp.media().file(imageUrl).create({
-        title: 'Image Loaded by React HeadLess',
-        alt_text: 'an image of something awesome',
-        caption: 'This is the caption text',
-        description: 'More explanatory information',
-      });
-    } catch (error) {
-      console.log('IMAGE UPLOAD ERROR: ', error);
-    }
+    // UPDATING THE CURRENT POSTS STATE
+    // Entering the new object in front of the old posts so that
+    // it shows up on top of the list, otherwise it will show up
+    // at the bottom
+    setPosts([createdSinglePost, ...posts]);
 
-    console.log('Uploaded Image ID:', uploadedImage.id);
+    console.log('NEW POSTS IN CREATE POST', posts);
 
-    try {
-      // CREATING NEW POST W FEATURED IMAGE
-      newPost = await wp.posts().create({
-        title: title,
-        content: content,
-        featured_media: uploadedImage.id,
-        categories: [157, 30],
-        tags: [374, 375],
-        status: 'publish',
-      });
-      // POST CREATION SUCCESS
-      setIsPending(false);
-      // SENDING USER TO BLOGINDEX PAGE
-      history.push('/');
-    } catch (error) {
-      console.log('POST CREATION ERROR: ', error);
-    }
-
-    console.log('Newly Created Post: ', newPost);
+    // POST CREATION SUCCESS
+    setIsPending(false);
+    // SENDING USER TO BLOGINDEX PAGE
+    // history.push('/');
   };
 
   return (
-    <Page wide={true} pageTitle="Movie Form">
-      <Row className="justify-content-center">
+    <>
+      <Row>
         <Col sm={12}>
-          <Content width="w-75" cssClassNames="bg-light mt-2 mx-auto">
-            <h3>Post Create Page</h3>
-            <h5>This time with Image ...</h5>
+          <Content width="w-100" cssClassNames="bg-light mt-2 text-center">
+            <h3>Post Create Page w/ Featured Image</h3>
           </Content>
         </Col>
       </Row>
       <Row className="justify-content-center">
         <Col sm={12}>
-          <Content width="w-75" cssClassNames="mt-2 mx-auto">
-            <input
-              type="text"
-              name="title"
-              id="title"
-              className="form-control mb-3"
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <input
-              type="file"
-              name="featured-image"
-              id="featured-image"
-              className="form-control mb-3"
-              onChange={(e) => setImageUrl(e.target.files[0])}
-            />
-            <textarea
-              name="content"
-              id="content"
-              cols="30"
-              rows="10"
-              className="form-control mb-3"
-              onChange={(e) => setContent(e.target.value)}
-            ></textarea>
-            <button
-              className="btn btn-info btn-block btn-lg"
-              onClick={handleInsertPost}
+          <Content
+            width="w-100"
+            cssClassNames="mx-auto animate__animated animate__lightSpeedInRight"
+          >
+            <FormJoi
+              data={formValues}
+              schema={schema}
+              setErrors={setErrors}
+              doSubmit={doSubmit}
             >
-              Create Now!
-            </button>
+              {/* INPUT JOI */}
+              <InputJoi
+                hideLabel={false}
+                label="Title"
+                type="text"
+                name="title"
+                placeholder="Post Title"
+                className="form-control"
+                onChangeState={setTitle}
+                error={errors.title}
+              />
+
+              {/* IMAGE FILE INPUT */}
+              <InputImageJoi
+                name="imageUrl"
+                errors={errors}
+                updateErrors={setErrors}
+                updateImageUrl={setImageUrl}
+                updateFileSize={setFileSize}
+                className="form-control mb-3"
+              />
+
+              {/* TEXT AREA */}
+              <TextAreaJoi
+                hideLabel={false}
+                label="Insert Post Content"
+                name="content"
+                placeholder="Insert Post Content"
+                className="form-control"
+                rows={3}
+                onChangeState={setContent}
+                error={errors.content}
+              />
+              <hr className="bg-primary" />
+
+              <button className="btn btn-primary mt-2" type="submit">
+                Create Now
+              </button>
+              {isPending && (
+                <div className="text-center">
+                  <Loader
+                    type="ThreeDots"
+                    color="red"
+                    height={100}
+                    width={100}
+                  />
+                </div>
+              )}
+            </FormJoi>
           </Content>
         </Col>
-        {isPending && (
-          <div className="text-center">
-            <Loader type="ThreeDots" color="red" height={100} width={100} />
-          </div>
-        )}
       </Row>
-    </Page>
+    </>
   );
 }
 

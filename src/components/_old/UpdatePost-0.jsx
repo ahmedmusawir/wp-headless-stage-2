@@ -5,158 +5,157 @@ import { Row, Col } from 'react-bootstrap';
 import Content from './layouts/Content';
 import Loader from 'react-loader-spinner';
 import parse from 'html-react-parser';
-import WPAPI from 'wpapi';
+import Joi from 'joi-browser';
+import InputJoi from './form-joi/InputJoi';
+import TextAreaJoi from './form-joi/TextAreaJoi';
+import InputImageJoi from './form-joi/InputImageJoi';
+import FormJoi from './form-joi/FormJoi';
+import { fetchSinglePost, updatePost } from '../services/HttpService';
+import 'animate.css';
 
 function UpdatePost({ postId }) {
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [content, setContent] = useState('');
   const [oldImage, setOldImage] = useState('');
+  const [fileSize, setFileSize] = useState('');
   const [isPending, setIsPending] = useState(false);
+  const [errors, setErrors] = useState({});
   const history = useHistory();
 
-  var wp = new WPAPI({
-    endpoint: 'http://localhost:10004/wp-json',
-    username: 'cgteam',
-    password: '8gLw rmzE hQhZ av4L 1ljg x119',
-  });
-
   useEffect(() => {
-    console.log('PostId via param:', postId);
-    const fetchSinglePost = async () => {
-      try {
-        // Loading Spinner Starts
-        setIsPending(true);
-        // Fetch Single Post
-        const singlePost = await wp.posts().id(postId).get();
-        console.log('Single Post: ', singlePost);
-        // setPost(singlePost);
-        setTitle(singlePost.title.rendered);
-        setContent(singlePost.content.rendered);
-        setOldImage(singlePost.featured_thumb);
+    // Loading Spinner Starts
+    setIsPending(true);
 
-        // Loading Spinner Ends
-        setIsPending(false);
-      } catch (e) {
-        // print error
-        console.log(e);
-        return [];
-      }
+    // Collecting Data from Http Service
+    const getSinglePost = async () => {
+      const gotSinglePost = await fetchSinglePost(postId);
+
+      console.log('Single Post', gotSinglePost);
+
+      // Updating Post Data
+      setTitle(gotSinglePost.title.rendered);
+      setContent(gotSinglePost.content.rendered);
+      setOldImage(gotSinglePost.featured_thumb);
+      // SETTING FILE SIZE MANUALLY
+      // So that Joi validates in case user don't upload new image
+      // If no new image is uploaded the file size won't validate by
+      // Joi, cuz it's empty. It only gets file size when a file is
+      // uploaded by the form. On the edit screen, the previous image
+      // is loaded from the REST api
+      setFileSize(500);
     };
-    fetchSinglePost();
+
+    getSinglePost();
+    // Loading Spinner Ends
+    setIsPending(false);
   }, []);
 
-  const handleInsertPost = async () => {
-    let uploadedImage = '';
-    let updatedPost = '';
+  // FORM VALUE OBJECT
+  const formValues = {
+    title: title,
+    content: content,
+    imageUrl: imageUrl,
+    fileSize: fileSize,
+  };
+
+  // JOI SCHEMA
+  const schema = {
+    title: Joi.string().trim().required().label('Title'),
+    content: Joi.string().trim().required().label('Content'),
+    // This the update page so no need for empty img validation
+    imageUrl: Joi.empty(),
+    fileSize: Joi.number().max(100000),
+  };
+
+  const doSubmit = async () => {
     // STARTING LOADING SPINNER
     setIsPending(true);
 
-    console.log('Image URL:', imageUrl);
+    // PERFORMING ACTUAL UPDATE
+    await updatePost(imageUrl, setImageUrl, postId, title, content);
 
-    if (imageUrl) {
-      try {
-        // UPLOADING IMAGE
-        uploadedImage = await wp.media().file(imageUrl).create({
-          title: 'Image Loaded by React HeadLess',
-          alt_text: 'an image of something awesome',
-          caption: 'This is the caption text',
-          description: 'More explanatory information',
-        });
-
-        console.log('Uploaded Image ID:', uploadedImage.id);
-      } catch (error) {
-        console.log('IMAGE UPLOAD ERROR: ', error);
-      }
-    } else {
-      setImageUrl(null);
-    }
-
-    try {
-      // CREATING NEW POST W FEATURED IMAGE
-      updatedPost = await wp
-        .posts()
-        .id(postId)
-        .update({
-          title: title,
-          content: content,
-          featured_media: uploadedImage.id,
-          categories: [157, 30],
-          tags: [374, 375],
-          status: 'publish',
-        });
-      // POST CREATION SUCCESS
-      setIsPending(false);
-      // SENDING USER TO BLOGINDEX PAGE
-      history.push('/');
-    } catch (error) {
-      console.log('POST CREATION ERROR: ', error);
-    }
-
-    console.log('Newly Created Post: ', updatedPost);
+    // END LOADING SPINNER
+    setIsPending(false);
+    // SENDING USER TO BLOGINDEX PAGE
+    history.push('/');
   };
 
   return (
     <Page wide={true} pageTitle="Movie Form">
       <Row className="justify-content-center">
         <Col sm={12}>
-          <Content width="w-75" cssClassNames="bg-light mt-2 mx-auto">
-            <h3>Post Update Page</h3>
-            <h5>This time with Image ...</h5>
+          <Content width="w-100" cssClassNames="bg-light mt-2 text-center">
+            <h3>
+              Post Update Page <small>with Image</small>
+            </h3>
           </Content>
         </Col>
       </Row>
       <Row className="justify-content-center">
         <Col sm={12}>
-          <Content width="w-75" cssClassNames="mt-2 mx-auto">
-            <input
-              type="text"
-              name="title"
-              id="title"
-              className="form-control mb-3"
-              value={parse(title)}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <input
-              type="file"
-              name="featured-image"
-              id="featured"
-              className="form-control mb-3"
-              onChange={(e) => {
-                const [file] = e.target.files;
-                const desktopImg = document.getElementById('desktop-img');
-                if (file) {
-                  desktopImg.src = URL.createObjectURL(file);
-                  console.log('LOCAL IMAGE', desktopImg.src);
-                }
-                setImageUrl(e.target.files[0]);
-              }}
-            />
-            <figure>
-              {/* DISPLAY Featured Image</h6> */}
-              <img
-                id="desktop-img"
-                src={oldImage}
-                alt=""
-                width={150}
-                height={150}
-              />
-            </figure>
-            <textarea
-              name="content"
-              id="content"
-              cols="30"
-              rows="10"
-              className="form-control mb-3"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-            ></textarea>
-            <button
-              className="btn btn-info btn-block btn-lg"
-              onClick={handleInsertPost}
+          <Content
+            width="w-100"
+            cssClassNames="mx-auto animate__animated animate__lightSpeedInRight"
+          >
+            <FormJoi
+              data={formValues}
+              schema={schema}
+              setErrors={setErrors}
+              doSubmit={doSubmit}
             >
-              Update Now!
-            </button>
+              {/* INPUT JOI */}
+              <InputJoi
+                hideLabel={false}
+                label="Title"
+                type="text"
+                name="title"
+                value={parse(title)}
+                placeholder="Post Title"
+                className="form-control"
+                onChangeState={setTitle}
+                error={errors.title}
+              />
+
+              {/* IMAGE FILE INPUT */}
+              <InputImageJoi
+                name="imageUrl"
+                errors={errors}
+                updateErrors={setErrors}
+                updateImageUrl={setImageUrl}
+                updateFileSize={setFileSize}
+                className="form-control mb-3"
+                lastImage={oldImage}
+              />
+
+              {/* TEXT AREA */}
+              <TextAreaJoi
+                hideLabel={false}
+                label="Insert Post Content"
+                name="content"
+                value={content}
+                placeholder="Insert Post Content"
+                className="form-control"
+                rows={3}
+                onChangeState={setContent}
+                error={errors.content}
+              />
+              <hr className="bg-primary" />
+
+              <button className="btn btn-primary mt-2" type="submit">
+                Create Now
+              </button>
+              {isPending && (
+                <div className="text-center">
+                  <Loader
+                    type="ThreeDots"
+                    color="red"
+                    height={100}
+                    width={100}
+                  />
+                </div>
+              )}
+            </FormJoi>
           </Content>
         </Col>
         {isPending && (

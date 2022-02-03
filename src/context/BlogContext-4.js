@@ -59,9 +59,17 @@ function BlogContextProvider(props) {
         {
           label: 'Yes',
           onClick: async () => {
+            // Loading Spinner Starts
+            // setIsPending(true);
+            // Post being deleted
             const deletedPost = await deletePost(postId);
             console.log('DELETED POST IN BLOG CONTEXT', deletedPost);
-            dispatch({ type: 'REMOVE_POST', payload: postId });
+            // toast.error(deletedPost); // CANNOT HANDLE VARIABLES ONLY TEXT
+            // UPDATING CURRENT POSTS STATE
+            // setPosts(posts.filter((post) => post.id !== postId));
+
+            // Loading Spinner Ends
+            // setIsPending(false);
           },
         },
         {

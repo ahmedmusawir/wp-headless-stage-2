@@ -11,45 +11,57 @@ import TextAreaJoi from './form-joi/TextAreaJoi';
 import InputImageJoi from './form-joi/InputImageJoi';
 import FormJoi from './form-joi/FormJoi';
 import { fetchSinglePost, updatePost } from '../services/HttpService';
+
 import 'animate.css';
 
-function UpdatePost({ postId }) {
+function UpdatePost({
+  postId,
+  singlePost,
+  posts,
+  setPosts,
+  isPending,
+  setIsPending,
+  oldImage,
+  setOldImage,
+}) {
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [content, setContent] = useState('');
-  const [oldImage, setOldImage] = useState('');
   const [fileSize, setFileSize] = useState('');
-  const [isPending, setIsPending] = useState(false);
   const [errors, setErrors] = useState({});
   const history = useHistory();
 
-  useEffect(() => {
-    // Loading Spinner Starts
-    setIsPending(true);
+  // console.log('SINGLE POST IN UPDATE POST', singlePost);
 
-    // Collecting Data from Http Service
+  useEffect(() => {
+    // Collecting Data from Http Service (in case the page refreshed)
     const getSinglePost = async () => {
       const gotSinglePost = await fetchSinglePost(postId);
-
       console.log('Single Post', gotSinglePost);
-
       // Updating Post Data
       setTitle(gotSinglePost.title.rendered);
       setContent(gotSinglePost.content.rendered);
       setOldImage(gotSinglePost.featured_thumb);
-      // SETTING FILE SIZE MANUALLY
-      // So that Joi validates in case user don't upload new image
-      // If no new image is uploaded the file size won't validate by
-      // Joi, cuz it's empty. It only gets file size when a file is
-      // uploaded by the form. On the edit screen, the previous image
-      // is loaded from the REST api
-      setFileSize(500);
     };
 
-    getSinglePost();
-    // Loading Spinner Ends
-    setIsPending(false);
-  }, []);
+    if (singlePost) {
+      setTitle(singlePost.title.rendered);
+      setContent(singlePost.content.rendered);
+      setOldImage(singlePost.featured_thumb);
+    } else {
+      getSinglePost();
+    }
+
+    // SETTING FILE SIZE MANUALLY
+    // So that Joi validates in case user don't upload new image
+    // If no new image is uploaded the file size won't validate by
+    // Joi, cuz it's empty. It only gets file size when a file is
+    // uploaded by the form. On the edit screen, the previous image
+    // is loaded from the REST api
+    setFileSize(500);
+  }, [posts]);
+
+  // console.log('SINGLE ON UPDATE POST', singlePost);
 
   // FORM VALUE OBJECT
   const formValues = {
@@ -73,10 +85,43 @@ function UpdatePost({ postId }) {
     setIsPending(true);
 
     // PERFORMING ACTUAL UPDATE
-    await updatePost(imageUrl, setImageUrl, postId, title, content);
+    const updatedPost = await updatePost(
+      imageUrl,
+      setImageUrl,
+      postId,
+      title,
+      content
+    );
 
-    // END LOADING SPINNER
+    console.log('UPDATED HTTPS POST IN UPDATE POST', updatedPost);
+    // UPDATING OLD IMAGE
+    setOldImage(updatedPost.featured_thumb);
+    console.log('OLD IMG URL', updatedPost.featured_thumb);
+
+    // UPDATING POSTS STATE
+    setPosts(
+      posts.map((post) => {
+        return post.id === singlePost.id
+          ? {
+              ...post,
+              title: {
+                rendered: title,
+              },
+              content: {
+                rendered: content,
+              },
+              excerpt: {
+                rendered: updatedPost.excerpt.rendered,
+              },
+              featured_full: updatedPost.featured_full,
+            }
+          : post;
+      })
+    );
+
+    // POST CREATION SUCCESS
     setIsPending(false);
+
     // SENDING USER TO BLOGINDEX PAGE
     history.push('/');
   };
@@ -85,13 +130,19 @@ function UpdatePost({ postId }) {
     <Page wide={true} pageTitle="Movie Form">
       <Row className="justify-content-center">
         <Col sm={12}>
-          <Content width="w-75" cssClassNames="bg-light mt-2">
-            <h3 className="text-center">
+          <Content width="w-100" cssClassNames="bg-light mt-2 text-center">
+            <h3>
               Post Update Page <small>with Image</small>
             </h3>
+            <img src={oldImage} alt="" />
           </Content>
         </Col>
       </Row>
+      {isPending && (
+        <div className="text-center">
+          <Loader type="ThreeDots" color="red" height={100} width={100} />
+        </div>
+      )}
       <Row className="justify-content-center">
         <Col sm={12}>
           <Content
@@ -103,6 +154,7 @@ function UpdatePost({ postId }) {
               schema={schema}
               setErrors={setErrors}
               doSubmit={doSubmit}
+              oldImage={oldImage}
             >
               {/* INPUT JOI */}
               <InputJoi
@@ -143,7 +195,7 @@ function UpdatePost({ postId }) {
               <hr className="bg-primary" />
 
               <button className="btn btn-primary mt-2" type="submit">
-                Create Now
+                UPDATE NOW
               </button>
               {isPending && (
                 <div className="text-center">
@@ -158,11 +210,6 @@ function UpdatePost({ postId }) {
             </FormJoi>
           </Content>
         </Col>
-        {isPending && (
-          <div className="text-center">
-            <Loader type="ThreeDots" color="red" height={100} width={100} />
-          </div>
-        )}
       </Row>
     </Page>
   );

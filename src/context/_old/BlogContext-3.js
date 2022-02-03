@@ -1,10 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import {
-  fetchPosts,
-  fetchSinglePost,
-  conf,
-  deletePost,
-} from '../services/HttpService';
+import { fetchPosts, conf, deletePost } from '../services/HttpService';
 import { loadMorePosts } from '../components/general/LoadMorePagination';
 import { confirmAlert } from 'react-confirm-alert';
 

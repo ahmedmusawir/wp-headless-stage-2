@@ -13,11 +13,11 @@ import _ from 'lodash';
 function SinglePostPage() {
   const { id } = useParams();
   const [post, setPost] = useState('');
-  const { state } = useContext(BlogContext);
+  const { posts, isPending } = useContext(BlogContext);
   const postId = Number(id);
 
   useEffect(() => {
-    const singlePost = _.find(state.posts, (post) => post.id === Number(id));
+    const singlePost = _.find(posts, (post) => post.id === Number(id));
     setPost(singlePost);
   }, []);
 
@@ -53,7 +53,7 @@ function SinglePostPage() {
               postId={postId}
               post={post}
               setPost={setPost}
-              isPending={state.isPending}
+              isPending={isPending}
             />
           </Content>
         </Col>

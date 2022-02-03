@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { fetchPosts, conf, deletePost } from '../services/HttpService';
+import { fetchPosts, conf, deletePost, wp } from '../../services/HttpService';
 
 export const BlogContext = createContext();
 
@@ -14,29 +14,29 @@ function BlogContextProvider(props) {
   const [pageNumber, setPageNumber] = useState(2);
   const [totalPages, setTotalPages] = useState(0);
 
-  // useEffect(() => {
-  //   async function fetchPosts() {
-  //     try {
-  //       setIsPending(true);
-  //       // FETCHING POSTS
-  //       const fetchedPosts = await wp.posts().get();
-  //       // console.log(fetchedPosts);
+  useEffect(() => {
+    async function fetchPosts() {
+      try {
+        setIsPending(true);
+        // FETCHING POSTS
+        const fetchedPosts = await wp.posts().get();
+        // console.log(fetchedPosts);
 
-  //       // GETTING TOTAL PAGES
-  //       const totalPages = fetchedPosts._paging.totalPages;
-  //       setTotalPages(totalPages);
+        // GETTING TOTAL PAGES
+        const totalPages = fetchedPosts._paging.totalPages;
+        setTotalPages(totalPages);
 
-  //       setPosts(fetchedPosts);
-  //       setIsPending(false);
-  //     } catch (e) {
-  //       // print error
-  //       console.log(e);
-  //       return [];
-  //     }
-  //   }
+        setPosts(fetchedPosts);
+        setIsPending(false);
+      } catch (e) {
+        // print error
+        console.log(e);
+        return [];
+      }
+    }
 
-  //   fetchPosts();
-  // }, []);
+    fetchPosts();
+  }, []);
 
   return (
     <BlogContext.Provider
@@ -44,7 +44,6 @@ function BlogContextProvider(props) {
         posts,
         setPosts,
         deletePost,
-        handleLoadMore,
         totalPages,
         pageNumber,
         isPending,

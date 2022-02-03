@@ -7,11 +7,7 @@ import { BlogReducer } from '../reducer/BlogReducer';
 export const BlogContext = createContext();
 
 function BlogContextProvider(props) {
-  // const [posts, setPosts] = useState([]);
   const [isPending, setIsPending] = useState(false);
-  // const [pageNumber, setPageNumber] = useState(2);
-  // const [totalPages, setTotalPages] = useState(0);
-  // const [perPage] = useState(conf.perPage);
 
   // SETTING UP REDUCER
   const initialState = {
@@ -24,9 +20,6 @@ function BlogContextProvider(props) {
   const [state, dispatch] = useReducer(BlogReducer, initialState);
 
   useEffect(() => {
-    // Loading Spinner Starts
-    // setIsPending(true);
-
     // Collecting Data from Http Service
     const getPosts = async () => {
       const gotPosts = await fetchPosts();
@@ -41,11 +34,6 @@ function BlogContextProvider(props) {
           perPage: conf.perPage,
         },
       });
-      // Updating Total Pages
-      // setTotalPages(gotPosts._paging.totalPages);
-
-      // Loading Spinner Ends
-      // setIsPending(false);
     };
 
     getPosts();
@@ -73,7 +61,6 @@ function BlogContextProvider(props) {
   };
 
   const handleLoadMore = async () => {
-    // console.log('load more button clicked');
     // Loading Spinner Starts
     setIsPending(true);
     // console.log('Handling Load More');
@@ -94,8 +81,6 @@ function BlogContextProvider(props) {
         perPage: conf.perPage,
       },
     });
-    // setPosts([...posts, ...snapShot.newPosts]);
-    // setPageNumber(snapShot.newPageNumber);
     // Loading Spinner Starts
     setIsPending(false);
   };
@@ -103,12 +88,8 @@ function BlogContextProvider(props) {
   return (
     <BlogContext.Provider
       value={{
-        // posts,
-        // setPosts,
         handleDelete,
         handleLoadMore,
-        // totalPages,
-        // pageNumber,
         isPending,
         setIsPending,
         state,

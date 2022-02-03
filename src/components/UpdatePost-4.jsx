@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import Page from './layouts/Page';
 import { Row, Col } from 'react-bootstrap';
@@ -11,11 +11,17 @@ import TextAreaJoi from './form-joi/TextAreaJoi';
 import InputImageJoi from './form-joi/InputImageJoi';
 import FormJoi from './form-joi/FormJoi';
 import { fetchSinglePost, updatePost } from '../services/HttpService';
-import { BlogContext } from '../context/BlogContext';
 
 import 'animate.css';
 
-function UpdatePost({ postId, singlePost }) {
+function UpdatePost({
+  postId,
+  singlePost,
+  posts,
+  setPosts,
+  isPending,
+  setIsPending,
+}) {
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [content, setContent] = useState('');
@@ -24,9 +30,7 @@ function UpdatePost({ postId, singlePost }) {
   const [errors, setErrors] = useState({});
   const history = useHistory();
 
-  const { state, dispatch } = useContext(BlogContext);
-
-  console.log('state IN UPDATE POST', state);
+  // console.log('SINGLE POST IN UPDATE POST', singlePost);
 
   useEffect(() => {
     // Collecting Data from Http Service (in case the page refreshed)
@@ -54,7 +58,7 @@ function UpdatePost({ postId, singlePost }) {
     // uploaded by the form. On the edit screen, the previous image
     // is loaded from the REST api
     setFileSize(500);
-  }, [singlePost, postId]);
+  }, [posts]);
 
   // console.log('SINGLE ON UPDATE POST', singlePost);
 
@@ -77,7 +81,7 @@ function UpdatePost({ postId, singlePost }) {
 
   const doSubmit = async () => {
     // STARTING LOADING SPINNER
-    // setIsPending(true);
+    setIsPending(true);
 
     // PERFORMING ACTUAL UPDATE
     const updatedPost = await updatePost(
@@ -91,38 +95,29 @@ function UpdatePost({ postId, singlePost }) {
     console.log('UPDATED HTTPS POST IN UPDATE POST', updatedPost);
 
     // UPDATING POSTS STATE
-    const alteredSinglePost = {
-      id: updatedPost.id,
-      title: {
-        rendered: title,
-      },
-      content: {
-        rendered: content,
-      },
-      excerpt: {
-        rendered: updatedPost.excerpt.rendered,
-      },
-      featured_full: updatedPost.featured_full,
-      featured_thumb: updatedPost.featured_thumb,
-    };
-
-    dispatch({
-      type: 'EDIT_POST',
-      payload: {
-        post: { ...alteredSinglePost },
-        isPending: false,
-        pageNumber: state.pageNumber,
-        totalPages: state.totalPages,
-        perPage: state.perPage,
-      },
-    });
-    // dispatch({
-    //   type: 'EDIT_POST',
-    //   payload: { ...alteredSinglePost },
-    // });
+    setPosts(
+      posts.map((post) => {
+        return post.id === singlePost.id
+          ? {
+              ...post,
+              title: {
+                rendered: title,
+              },
+              content: {
+                rendered: content,
+              },
+              excerpt: {
+                rendered: updatedPost.excerpt.rendered,
+              },
+              featured_full: updatedPost.featured_full,
+              featured_thumb: updatedPost.featured_thumb,
+            }
+          : post;
+      })
+    );
 
     // POST CREATION SUCCESS
-    // setIsPending(false);
+    setIsPending(false);
 
     // SENDING USER TO BLOGINDEX PAGE
     history.push('/');
@@ -139,7 +134,7 @@ function UpdatePost({ postId, singlePost }) {
           </Content>
         </Col>
       </Row>
-      {state.isPending && (
+      {isPending && (
         <div className="text-center">
           <Loader type="ThreeDots" color="red" height={100} width={100} />
         </div>
@@ -197,7 +192,7 @@ function UpdatePost({ postId, singlePost }) {
               <button className="btn btn-primary mt-2" type="submit">
                 UPDATE NOW
               </button>
-              {state.isPending && (
+              {isPending && (
                 <div className="text-center">
                   <Loader
                     type="ThreeDots"

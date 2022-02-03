@@ -14,8 +14,6 @@ function UpdatePostPage() {
 
   const singlePost = _.find(state.posts, (post) => post.id === Number(id));
 
-  console.log('state IN UPDATE POST PAGE', state);
-
   return (
     <Page wide={true} pageTitle="Sample Page">
       <Row className="justify-content-center">
@@ -24,9 +22,9 @@ function UpdatePostPage() {
             <UpdatePost
               postId={postId}
               singlePost={singlePost}
-              // posts={state.posts}
-              // dispatch={dispatch}
-              // isPending={state.isPending}
+              posts={state.posts}
+              dispatch={dispatch}
+              isPending={state.isPending}
             />
           </Content>
         </Col>

@@ -19,7 +19,7 @@ function CreatePost({ posts, setPosts, isPending, setIsPending }) {
   const [errors, setErrors] = useState({});
   const history = useHistory();
 
-  // console.log('OLD POSTS IN CREATE POST', posts);
+  console.log('OLD POSTS IN CREATE POST', posts);
   // FORM VALUE OBJECT
   const formValues = {
     title: title,
@@ -72,7 +72,7 @@ function CreatePost({ posts, setPosts, isPending, setIsPending }) {
     // POST CREATION SUCCESS
     setIsPending(false);
     // SENDING USER TO BLOGINDEX PAGE
-    history.push('/');
+    // history.push('/');
   };
 
   return (

@@ -1,7 +1,6 @@
 import WPAPI from 'wpapi';
 import config from './ConfigService';
 import * as Sentry from '@sentry/react';
-import { toast } from 'react-toastify';
 
 // Create WPAPI instance and add endpoint to /wp-json
 const wp = new WPAPI({
@@ -49,7 +48,6 @@ export const insertPost = async (data) => {
     });
   } catch (error) {
     console.log('IMAGE UPLOAD ERROR: ', error);
-    toast.error('AN ERROR HAS OCCURED UPLOADING IMAGE');
   }
 
   console.log('Uploaded Image ID:', uploadedImage.id);
@@ -66,7 +64,6 @@ export const insertPost = async (data) => {
     });
   } catch (error) {
     console.log('POST CREATION ERROR: ', error);
-    toast.error('AN ERROR HAS OCCURED ON POST CREATION');
   }
 
   // console.log('Newly Created Post FROM HTTP: ', newPost);
@@ -117,34 +114,22 @@ export const updatePost = async (
         status: 'publish',
       });
   } catch (error) {
-    console.log('POST UPDATE ERROR: ', error);
-    toast.error('AN ERROR HAS OCCURED ON UPDATE POST - HTTP SERVICE');
+    console.log('POST CREATION ERROR: ', error);
   }
 
   // console.log('Newly Created Post: ', updatedPost);
   return updatedPost;
 };
 
-export const deletePost = async (id) => {
-  // id = null; // FOR ERROR TESTING
-  let deletedPost;
-  try {
-    deletedPost = await wp
-      .posts()
-      .id(id)
-      .delete()
-      .then((res) => {
-        console.log('DELETE RES FROM HTTP', res);
-        return res;
-      });
-  } catch (error) {
-    console.log('DELETE HTTP ERROR', error);
-    toast.error(
-      'AN ERROR HAS OCCURED in HTTP SERVICE: The item was not deleted from the Database.'
-    );
-  }
-
-  return deletedPost;
+export const deletePost = async (id, posts, setPosts) => {
+  await wp
+    .posts()
+    .id(id)
+    .delete()
+    .then((res) => {
+      console.log(res);
+      setPosts(posts.filter((post) => post.id !== res.id));
+    });
 };
 
 export const conf = config;

@@ -6,12 +6,9 @@ import parse from 'html-react-parser';
 import { Link } from 'react-router-dom';
 import LoadMorePagination from '../components/general/LoadMorePagination';
 import { BlogContext } from '../context/BlogContext';
-import { ToastContainer, toast } from 'react-toastify';
-
 import Masonry from 'react-masonry-css';
 import './BlogIndex.scss';
 import 'animate.css';
-import 'react-toastify/dist/ReactToastify.css';
 
 function BlogIndex() {
   const {
@@ -29,13 +26,12 @@ function BlogIndex() {
   const breakpointColumnsObj = {
     default: 4,
     1500: 3,
-    1100: 4,
+    1100: 2,
     700: 1,
   };
 
   return (
     <>
-      <ToastContainer />
       <Row className="justify-content-center">
         <Col sm={12}>
           <Content

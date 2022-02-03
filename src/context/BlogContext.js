@@ -7,6 +7,7 @@ import {
 } from '../services/HttpService';
 import { loadMorePosts } from '../components/general/LoadMorePagination';
 import { confirmAlert } from 'react-confirm-alert';
+import { ToastContainer, toast } from 'react-toastify';
 
 export const BlogContext = createContext();
 
@@ -48,7 +49,12 @@ function BlogContextProvider(props) {
             // Loading Spinner Starts
             setIsPending(true);
             // Post being deleted
-            await deletePost(postId, posts, setPosts);
+            const deletedPost = await deletePost(postId);
+            console.log('DELETED POST IN BLOG CONTEXT', deletedPost);
+            // toast.error(deletedPost); // CANNOT HANDLE VARIABLES ONLY TEXT
+            // UPDATING CURRENT POSTS STATE
+            setPosts(posts.filter((post) => post.id !== postId));
+
             // Loading Spinner Ends
             setIsPending(false);
           },

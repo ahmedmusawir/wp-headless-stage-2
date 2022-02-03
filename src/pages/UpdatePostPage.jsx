@@ -9,8 +9,7 @@ import _ from 'lodash';
 
 function UpdatePostPage() {
   const { id } = useParams();
-  const { posts, setPosts, isPending, setIsPending, oldImage, setOldImage } =
-    useContext(BlogContext);
+  const { posts, setPosts, isPending, setIsPending } = useContext(BlogContext);
   const postId = Number(id);
 
   const singlePost = _.find(posts, (post) => post.id === Number(id));
@@ -27,8 +26,6 @@ function UpdatePostPage() {
               setPosts={setPosts}
               isPending={isPending}
               setIsPending={setIsPending}
-              oldImage={oldImage}
-              setOldImage={setOldImage}
             />
           </Content>
         </Col>

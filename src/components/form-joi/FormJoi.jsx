@@ -19,7 +19,7 @@ function FormJoi({ data, schema, setErrors, doSubmit, children }) {
           break;
 
         case 'fileSize':
-          item.message = 'Featued Image must be smaller than 300 Kelobytes';
+          item.message = 'Featued Image must be smaller than 100 Kelobytes';
           errors[item.path[0]] = item.message;
           break;
 

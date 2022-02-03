@@ -1,25 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import Page from './layouts/Page';
 import { Row, Col } from 'react-bootstrap';
 import Content from './layouts/Content';
-import Joi from 'joi-browser';
 import Loader from 'react-loader-spinner';
+import parse from 'html-react-parser';
+import Joi from 'joi-browser';
 import InputJoi from './form-joi/InputJoi';
 import TextAreaJoi from './form-joi/TextAreaJoi';
 import InputImageJoi from './form-joi/InputImageJoi';
 import FormJoi from './form-joi/FormJoi';
-import { insertPost } from '../services/HttpService';
+import { fetchSinglePost, updatePost } from '../services/HttpService';
+
 import 'animate.css';
 
-function CreatePost({ posts, setPosts, isPending, setIsPending }) {
+function UpdatePost({
+  postId,
+  singlePost,
+  posts,
+  setPosts,
+  isPending,
+  setIsPending,
+}) {
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [content, setContent] = useState('');
   const [fileSize, setFileSize] = useState('');
+  const [oldImage, setOldImage] = useState('');
   const [errors, setErrors] = useState({});
   const history = useHistory();
 
-  // console.log('OLD POSTS IN CREATE POST', posts);
+  // console.log('SINGLE POST IN UPDATE POST', singlePost);
+
+  useEffect(() => {
+    // Collecting Data from Http Service (in case the page refreshed)
+    const getSinglePost = async () => {
+      const gotSinglePost = await fetchSinglePost(postId);
+      console.log('Single Post', gotSinglePost);
+      // Updating Post Data
+      setTitle(gotSinglePost.title.rendered);
+      setContent(gotSinglePost.content.rendered);
+      setOldImage(gotSinglePost.featured_thumb);
+    };
+
+    if (singlePost) {
+      setTitle(singlePost.title.rendered);
+      setContent(singlePost.content.rendered);
+      setOldImage(singlePost.featured_thumb);
+    } else {
+      getSinglePost();
+    }
+
+    // SETTING FILE SIZE MANUALLY
+    // So that Joi validates in case user don't upload new image
+    // If no new image is uploaded the file size won't validate by
+    // Joi, cuz it's empty. It only gets file size when a file is
+    // uploaded by the form. On the edit screen, the previous image
+    // is loaded from the REST api
+    setFileSize(500);
+  }, [posts]);
+
+  // console.log('SINGLE ON UPDATE POST', singlePost);
+
   // FORM VALUE OBJECT
   const formValues = {
     title: title,
@@ -31,59 +73,72 @@ function CreatePost({ posts, setPosts, isPending, setIsPending }) {
   // JOI SCHEMA
   const schema = {
     title: Joi.string().trim().required().label('Title'),
-    content: Joi.string().required().label('Content'),
-    imageUrl: Joi.object().required().label('Featured Image'),
+    content: Joi.string().trim().required().label('Content'),
+    // This the update page so no need for empty img validation
+    imageUrl: Joi.empty(),
     fileSize: Joi.number().max(100000),
   };
 
   const doSubmit = async () => {
-    // DISPLAY SUBMIT VALUE
-    console.log('FORM VALUES SUBMITTED: ', formValues);
     // STARTING LOADING SPINNER
     setIsPending(true);
-    // INSERT POST TO WP DB
-    const insertedPost = await insertPost(formValues);
-    console.log('INSERTED POST IN CREATE POST', insertedPost);
 
-    // DATA ALTERED FOR LOCAL INSTANT FEEDBACK
-    const createdSinglePost = {
-      id: insertedPost.id,
-      title: {
-        rendered: insertedPost.title.rendered,
-      },
-      content: {
-        rendered: insertedPost.content.rendered,
-      },
-      excerpt: {
-        rendered: insertedPost.excerpt.rendered,
-      },
-      featured_full: insertedPost.featured_full,
-      featured_thumb: insertedPost.featured_thumb,
-    };
+    // PERFORMING ACTUAL UPDATE
+    const updatedPost = await updatePost(
+      imageUrl,
+      setImageUrl,
+      postId,
+      title,
+      content
+    );
 
-    // UPDATING THE CURRENT POSTS STATE
-    // Entering the new object in front of the old posts so that
-    // it shows up on top of the list, otherwise it will show up
-    // at the bottom
-    setPosts([createdSinglePost, ...posts]);
+    console.log('UPDATED HTTPS POST IN UPDATE POST', updatedPost);
 
-    console.log('NEW POSTS IN CREATE POST', posts);
+    // UPDATING POSTS STATE
+    setPosts(
+      posts.map((post) => {
+        return post.id === singlePost.id
+          ? {
+              ...post,
+              title: {
+                rendered: title,
+              },
+              content: {
+                rendered: content,
+              },
+              excerpt: {
+                rendered: updatedPost.excerpt.rendered,
+              },
+              featured_full: updatedPost.featured_full,
+              featured_thumb: updatedPost.featured_thumb,
+            }
+          : post;
+      })
+    );
 
     // POST CREATION SUCCESS
     setIsPending(false);
+
     // SENDING USER TO BLOGINDEX PAGE
     history.push('/');
   };
 
   return (
-    <>
-      <Row>
+    <Page wide={true} pageTitle="Movie Form">
+      <Row className="justify-content-center">
         <Col sm={12}>
           <Content width="w-100" cssClassNames="bg-light mt-2 text-center">
-            <h3>Post Create Page w/ Featured Image</h3>
+            <h3>
+              Post Update Page <small>with Image</small>
+            </h3>
           </Content>
         </Col>
       </Row>
+      {isPending && (
+        <div className="text-center">
+          <Loader type="ThreeDots" color="red" height={100} width={100} />
+        </div>
+      )}
       <Row className="justify-content-center">
         <Col sm={12}>
           <Content
@@ -102,6 +157,7 @@ function CreatePost({ posts, setPosts, isPending, setIsPending }) {
                 label="Title"
                 type="text"
                 name="title"
+                value={parse(title)}
                 placeholder="Post Title"
                 className="form-control"
                 onChangeState={setTitle}
@@ -116,6 +172,7 @@ function CreatePost({ posts, setPosts, isPending, setIsPending }) {
                 updateImageUrl={setImageUrl}
                 updateFileSize={setFileSize}
                 className="form-control mb-3"
+                lastImage={oldImage}
               />
 
               {/* TEXT AREA */}
@@ -123,6 +180,7 @@ function CreatePost({ posts, setPosts, isPending, setIsPending }) {
                 hideLabel={false}
                 label="Insert Post Content"
                 name="content"
+                value={content}
                 placeholder="Insert Post Content"
                 className="form-control"
                 rows={3}
@@ -132,7 +190,7 @@ function CreatePost({ posts, setPosts, isPending, setIsPending }) {
               <hr className="bg-primary" />
 
               <button className="btn btn-primary mt-2" type="submit">
-                Create Now
+                UPDATE NOW
               </button>
               {isPending && (
                 <div className="text-center">
@@ -148,8 +206,8 @@ function CreatePost({ posts, setPosts, isPending, setIsPending }) {
           </Content>
         </Col>
       </Row>
-    </>
+    </Page>
   );
 }
 
-export default CreatePost;
+export default UpdatePost;

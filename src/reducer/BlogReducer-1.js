@@ -7,7 +7,7 @@ export const BlogReducer = (state, action) => {
       return {
         posts: action.payload.posts,
         isPending: action.payload.isPending,
-        pageNumber: state.pageNumber,
+        pageNumber: action.payload.pageNumber,
         totalPages: action.payload.totalPages,
         perPage: action.payload.perPage,
       };
@@ -17,21 +17,14 @@ export const BlogReducer = (state, action) => {
       return {
         posts: action.payload.posts,
         pageNumber: action.payload.pageNumber,
-        totalPages: state.totalPages,
+        totalPages: action.payload.totalPages,
         perPage: action.payload.perPage,
-        isLoadMorePending: action.payload.isLoadMorePending,
       };
     }
 
     case 'ADD_POST':
-      // console.log('ADD_POST ACTION:', action);
-      // console.log('ADD_POST STATE:', state);
-
       return {
-        posts: [action.payload.post, ...state.posts],
-        pageNumber: state.pageNumber,
-        totalPages: state.totalPages,
-        perPage: state.perPage,
+        posts: [...state.posts, action.payload],
       };
 
     case 'EDIT_POST':
@@ -54,10 +47,6 @@ export const BlogReducer = (state, action) => {
     case 'REMOVE_POST':
       return {
         posts: state.posts.filter((post) => post.id !== action.payload),
-        isPending: state.isPending,
-        pageNumber: state.pageNumber,
-        totalPages: state.totalPages,
-        perPage: state.perPage,
       };
 
     default:

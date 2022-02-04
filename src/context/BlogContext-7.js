@@ -7,6 +7,7 @@ import { BlogReducer } from '../reducer/BlogReducer';
 export const BlogContext = createContext();
 
 function BlogContextProvider(props) {
+  const [loadMoreSpinning, setLoadMoreSpinning] = useState(false);
   // SETTING UP REDUCER
   const initialState = {
     posts: [],
@@ -14,7 +15,6 @@ function BlogContextProvider(props) {
     pageNumber: 2,
     totalPages: 0,
     perPage: conf.perPage,
-    isLoadMorePending: false,
   };
   const [state, dispatch] = useReducer(BlogReducer, initialState);
 
@@ -59,33 +59,25 @@ function BlogContextProvider(props) {
   };
 
   const handleLoadMore = async () => {
-    // REDUCER STATE UPDATE FOR LOAD MORE SPINNER
-    dispatch({
-      type: 'LOAD_MORE',
-      payload: {
-        posts: state.posts,
-        pageNumber: state.newPageNumber,
-        perPage: conf.perPage,
-        isLoadMorePending: true,
-      },
-    });
-    // LOADING NEW PAGE
+    // Loading Spinner Starts
+    setLoadMoreSpinning(true);
     const snapShot = await loadMorePosts(
       state.pageNumber,
       state.perPage,
       state.totalPages
     );
 
-    // REDUCER STATE UPDATE FOR LOAD MORE
+    // REDUCER STATE ON FETCH POSTS
     dispatch({
       type: 'LOAD_MORE',
       payload: {
         posts: [...state.posts, ...snapShot.newPosts],
         pageNumber: snapShot.newPageNumber,
         perPage: conf.perPage,
-        isLoadMorePending: false,
       },
     });
+    // Loading Spinner Starts
+    setLoadMoreSpinning(false);
   };
 
   return (
@@ -93,6 +85,8 @@ function BlogContextProvider(props) {
       value={{
         handleDelete,
         handleLoadMore,
+        loadMoreSpinning,
+        setLoadMoreSpinning,
         state,
         dispatch,
       }}

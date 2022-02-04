@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Row, Col } from 'react-bootstrap';
 import Content from './layouts/Content';
@@ -9,21 +9,17 @@ import TextAreaJoi from './form-joi/TextAreaJoi';
 import InputImageJoi from './form-joi/InputImageJoi';
 import FormJoi from './form-joi/FormJoi';
 import { insertPost } from '../services/HttpService';
-import { BlogContext } from '../context/BlogContext';
-
 import 'animate.css';
 
-function CreatePost() {
+function CreatePost({ posts, setPosts, isPending, setIsPending }) {
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [content, setContent] = useState('');
   const [fileSize, setFileSize] = useState('');
   const [errors, setErrors] = useState({});
-  const [isInsertPending, setIsInsertPending] = useState(false);
   const history = useHistory();
 
-  const { state, dispatch } = useContext(BlogContext);
-
+  // console.log('OLD POSTS IN CREATE POST', posts);
   // FORM VALUE OBJECT
   const formValues = {
     title: title,
@@ -41,13 +37,10 @@ function CreatePost() {
   };
 
   const doSubmit = async () => {
-    // STARTING LOADING SPINNER
-    setIsInsertPending(true);
-
     // DISPLAY SUBMIT VALUE
     console.log('FORM VALUES SUBMITTED: ', formValues);
     // STARTING LOADING SPINNER
-    // setIsPending(true);
+    setIsPending(true);
     // INSERT POST TO WP DB
     const insertedPost = await insertPost(formValues);
     console.log('INSERTED POST IN CREATE POST', insertedPost);
@@ -69,16 +62,15 @@ function CreatePost() {
     };
 
     // UPDATING THE CURRENT POSTS STATE
-    dispatch({
-      type: 'ADD_POST',
-      payload: {
-        post: createdSinglePost,
-      },
-    });
+    // Entering the new object in front of the old posts so that
+    // it shows up on top of the list, otherwise it will show up
+    // at the bottom
+    setPosts([createdSinglePost, ...posts]);
 
-    // STOPPING LOADING SPINNER
-    setIsInsertPending(false);
+    console.log('NEW POSTS IN CREATE POST', posts);
 
+    // POST CREATION SUCCESS
+    setIsPending(false);
     // SENDING USER TO BLOGINDEX PAGE
     history.push('/');
   };
@@ -142,12 +134,11 @@ function CreatePost() {
               <button className="btn btn-primary mt-2" type="submit">
                 Create Now
               </button>
-
-              {isInsertPending && (
+              {isPending && (
                 <div className="text-center">
                   <Loader
-                    type="Puff"
-                    color="dodgerblue"
+                    type="ThreeDots"
+                    color="red"
                     height={100}
                     width={100}
                   />

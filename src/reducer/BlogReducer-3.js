@@ -2,12 +2,23 @@ export const BlogReducer = (state, action) => {
   // console.log('ACTION:', action);
   // console.log('STATE:', state);
   switch (action.type) {
+    case 'LOAD_SPINNER': {
+      // console.log('LOAD MORE PAYLOAD', action.payload);
+      return {
+        posts: action.payload.posts,
+        isPending: action.payload.isPending,
+        pageNumber: action.payload.pageNumber,
+        totalPages: action.payload.totalPages,
+        perPage: action.payload.perPage,
+      };
+    }
+
     case 'FETCH_POSTS':
       // console.log('FETCH_POSTS PAYLOAD', action.payload);
       return {
         posts: action.payload.posts,
         isPending: action.payload.isPending,
-        pageNumber: state.pageNumber,
+        pageNumber: action.payload.pageNumber,
         totalPages: action.payload.totalPages,
         perPage: action.payload.perPage,
       };
@@ -17,18 +28,17 @@ export const BlogReducer = (state, action) => {
       return {
         posts: action.payload.posts,
         pageNumber: action.payload.pageNumber,
-        totalPages: state.totalPages,
+        totalPages: action.payload.totalPages,
         perPage: action.payload.perPage,
-        isLoadMorePending: action.payload.isLoadMorePending,
       };
     }
 
     case 'ADD_POST':
       // console.log('ADD_POST ACTION:', action);
       // console.log('ADD_POST STATE:', state);
-
       return {
         posts: [action.payload.post, ...state.posts],
+        isPending: state.isPending,
         pageNumber: state.pageNumber,
         totalPages: state.totalPages,
         perPage: state.perPage,

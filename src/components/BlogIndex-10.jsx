@@ -16,8 +16,6 @@ import 'react-toastify/dist/ReactToastify.css';
 function BlogIndex() {
   const { state, handleDelete, handleLoadMore } = useContext(BlogContext);
 
-  // console.log('STATE - BLOG INDEX', state.posts);
-
   // MASONRY BREAKING POINT
   const breakpointColumnsObj = {
     default: 4,

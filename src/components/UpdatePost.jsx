@@ -22,11 +22,13 @@ function UpdatePost({ postId, singlePost }) {
   const [fileSize, setFileSize] = useState('');
   const [oldImage, setOldImage] = useState('');
   const [errors, setErrors] = useState({});
+  const [isPending, setIsPending] = useState(false);
+  const [isUpdatePending, setIsUpdatePending] = useState(false);
   const history = useHistory();
 
   const { state, dispatch } = useContext(BlogContext);
 
-  console.log('state IN UPDATE POST', state);
+  // console.log('state IN UPDATE POST', state);
 
   useEffect(() => {
     // Collecting Data from Http Service (in case the page refreshed)
@@ -77,7 +79,7 @@ function UpdatePost({ postId, singlePost }) {
 
   const doSubmit = async () => {
     // STARTING LOADING SPINNER
-    // setIsPending(true);
+    setIsUpdatePending(true);
 
     // PERFORMING ACTUAL UPDATE
     const updatedPost = await updatePost(
@@ -116,13 +118,9 @@ function UpdatePost({ postId, singlePost }) {
         perPage: state.perPage,
       },
     });
-    // dispatch({
-    //   type: 'EDIT_POST',
-    //   payload: { ...alteredSinglePost },
-    // });
 
-    // POST CREATION SUCCESS
-    // setIsPending(false);
+    // POST UPDATE SUCCESS
+    setIsUpdatePending(false);
 
     // SENDING USER TO BLOGINDEX PAGE
     history.push('/');
@@ -197,14 +195,9 @@ function UpdatePost({ postId, singlePost }) {
               <button className="btn btn-primary mt-2" type="submit">
                 UPDATE NOW
               </button>
-              {state.isPending && (
+              {isUpdatePending && (
                 <div className="text-center">
-                  <Loader
-                    type="ThreeDots"
-                    color="red"
-                    height={100}
-                    width={100}
-                  />
+                  <Loader type="Puff" color="red" height={100} width={100} />
                 </div>
               )}
             </FormJoi>

@@ -14,9 +14,8 @@ import 'animate.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 function BlogIndex() {
-  const { state, handleDelete, handleLoadMore } = useContext(BlogContext);
-
-  // console.log('STATE - BLOG INDEX', state.posts);
+  const { state, handleDelete, handleLoadMore, loadMoreSpinning } =
+    useContext(BlogContext);
 
   // MASONRY BREAKING POINT
   const breakpointColumnsObj = {
@@ -96,12 +95,11 @@ function BlogIndex() {
         </Content>
       </Row>
 
-      {state.isLoadMorePending && (
+      {loadMoreSpinning && (
         <div className="text-center">
-          <Loader type="Puff" color="red" height={100} width={100} />
+          <Loader type="ThreeDots" color="red" height={100} width={100} />
         </div>
       )}
-
       {state.totalPages > 1 && state.pageNumber && (
         <LoadMorePagination onLoadMore={handleLoadMore} />
       )}

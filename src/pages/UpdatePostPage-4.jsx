@@ -14,7 +14,7 @@ function UpdatePostPage() {
 
   const singlePost = _.find(state.posts, (post) => post.id === Number(id));
 
-  // console.log('state IN UPDATE POST PAGE', state);
+  console.log('state IN UPDATE POST PAGE', state);
 
   return (
     <Page wide={true} pageTitle="Sample Page">

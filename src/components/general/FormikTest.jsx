@@ -4,12 +4,11 @@ import Content from '../layouts/Content';
 import { Row, Col } from 'react-bootstrap';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-// import './FormikTest.scss';
 
 function FormikTest() {
   const initialValues = {
     userName: '',
-    userFile: '',
+    userEmail: '',
     accept: false,
     countries: [],
     gender: '',
@@ -24,9 +23,9 @@ function FormikTest() {
 
   const validationSchema = Yup.object({
     userName: Yup.string().required('Name is Required!'),
-    // userEmail: Yup.string()
-    //   .email('Invalid Email Format')
-    //   .required('Email is Required!'),
+    userEmail: Yup.string()
+      .email('Invalid Email Format')
+      .required('Email is Required!'),
     accept: Yup.boolean().oneOf(
       [true],
       'Must accept our terms and conditions!'
@@ -91,7 +90,7 @@ function FormikTest() {
                   </p>
                 </div>
                 {/* EMAIL INPUT */}
-                {/* <div className="mb-2">
+                <div className="mb-2">
                   <label htmlFor="userEmail" className="form-label">
                     User Email
                   </label>
@@ -107,10 +106,10 @@ function FormikTest() {
                     component="div"
                     className="alert alert-danger"
                   />
-                </div> */}
+                </div>
                 <hr className="bg-primary" />
                 {/* FILE INPUT */}
-                <div className="mb-2">
+                {/* <div className="mb-2">
                   <label htmlFor="userEmail" className="form-label">
                     User Image
                   </label>
@@ -127,7 +126,7 @@ function FormikTest() {
                     className="alert alert-danger"
                   />
                 </div>
-                <hr className="bg-primary" />
+                <hr className="bg-primary" /> */}
 
                 {/* CHECKBOX */}
                 <div className="form-check pb-1 mb-2">

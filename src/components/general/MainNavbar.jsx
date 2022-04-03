@@ -21,9 +21,15 @@ function MainNavbar(props) {
             <Nav.Link as={Link} to="/form-joi-page">
               Form Joi Page
             </Nav.Link>
-            <Nav.Link as={Link} to="/form-moose-page">
-              Form Moose Page
+            <Nav.Link as={Link} to="/woocom-page">
+              Woocom
             </Nav.Link>
+            <Nav.Link as={Link} to="/stripe-page">
+              Stripe
+            </Nav.Link>
+            {/* <Nav.Link as={Link} to="/form-moose-page">
+              Form Moose Page
+            </Nav.Link> */}
             {/* <Nav.Link as={Link} to="/nextprev">
               Next/Prev Pagination
             </Nav.Link>

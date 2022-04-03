@@ -12,6 +12,8 @@ import FormikPage from './pages/FormikPage';
 import FormJoiPage from './pages/FormJoiPage';
 import MooseFormPage from './pages/MooseFormPage';
 import BlogContextProvider from './context/BlogContext';
+import WooComPage from './pages/WooComPage';
+import StripePage from './pages/StripePage';
 // import PostCreatePage from './pages/_old/PostCreatePage';
 // import NextPrevPage from './pages/NextPrevPage';
 // import NumericPage from './pages/NumericPage';
@@ -64,6 +66,12 @@ function App(props) {
             </Route>
             <Route exact path="/form-moose-page">
               <MooseFormPage />
+            </Route>
+            <Route exact path="/woocom-page">
+              <WooComPage />
+            </Route>
+            <Route exact path="/stripe-page">
+              <StripePage />
             </Route>
             <Route path="/*">
               <NotFound />
